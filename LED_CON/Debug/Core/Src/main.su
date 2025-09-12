@@ -1,0 +1,13 @@
+../Core/Src/main.c:67:1:__io_putchar	16	static
+../Core/Src/main.c:76:6:smartcar_F	8	static
+../Core/Src/main.c:90:6:smartcar_B	8	static
+../Core/Src/main.c:104:6:smartcar_S	8	static
+../Core/Src/main.c:118:6:smartcar_FL	8	static
+../Core/Src/main.c:133:6:smartcar_FR	8	static
+../Core/Src/main.c:147:6:smartcar_BL	8	static
+../Core/Src/main.c:162:6:smartcar_BR	8	static
+../Core/Src/main.c:182:5:main	8	static
+../Core/Src/main.c:330:6:SystemClock_Config	72	static
+../Core/Src/main.c:369:13:MX_USART2_UART_Init	8	static
+../Core/Src/main.c:402:13:MX_GPIO_Init	40	static
+../Core/Src/main.c:461:6:Error_Handler	4	static,ignoring_inline_asm
