@@ -222,6 +222,14 @@ void R_ultrasonic(void)
 		printf("Out of Range!\n\r\n");
 
 }
+
+void emergent_stop(void)
+{
+	if(L_dist <= 150)
+	{
+		smartcar_S();
+	}
+}
 /* USER CODE END 0 */
 
 /**
@@ -272,6 +280,7 @@ int main(void)
 	  L_ultrasonic();
 	  R_ultrasonic();
 
+
 	  if(receive == 'W')
 	  {
 		  printf("\r\n");
@@ -279,6 +288,7 @@ int main(void)
 		  sprintf((char *)transmit, "GO\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_F();
+		  emergent_stop();
 
 	  }
 
@@ -289,6 +299,7 @@ int main(void)
 		  sprintf((char *)transmit, "BACK\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_B();
+		  emergent_stop();
 	  }
 
 	  if(receive == 'A')
@@ -298,6 +309,7 @@ int main(void)
 		  sprintf((char *)transmit, "F_LEFT\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_FL();
+		  emergent_stop();
 	  }
 
 	  if(receive == 'D')
@@ -307,6 +319,7 @@ int main(void)
 		  sprintf((char *)transmit, "F_RIGHT\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_FR();
+		  emergent_stop();
 	  }
 
 	  if(receive == 'P')
@@ -316,6 +329,7 @@ int main(void)
 		  sprintf((char *)transmit, "OFF\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_S();
+		  emergent_stop();
 	  }
   }
   /* USER CODE END 3 */
