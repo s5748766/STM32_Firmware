@@ -120,8 +120,8 @@ void smartcar_S(void)
 
 void smartcar_FL(void)
 {
-	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 0);
-	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
+	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 1);
+	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 1);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 0);
@@ -135,8 +135,8 @@ void smartcar_FR(void)
 {
 	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 0);
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
-	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
-	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
+	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 1);
+	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 1);
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 1);
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 1);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
@@ -145,8 +145,8 @@ void smartcar_FR(void)
 
 void smartcar_BL(void)
 {
-	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 0);
-	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
+	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 1);
+	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 1);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
 	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 0);
@@ -160,8 +160,8 @@ void smartcar_BR(void)
 {
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 0);
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
-	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
-	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
+	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 1);
+	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 1);
 	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 1);
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 1);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
@@ -303,62 +303,61 @@ int main(void)
 		  sprintf((char *)transmit, "GO\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_F();
-		  HAL_Delay(50);
+		  HAL_Delay(10);
 
 	  }
 
-	  else if(receive == 'S')
+	  if(receive == 'S')
 	  {
 		  printf("\r\n");
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		  sprintf((char *)transmit, "BACK\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_B();
-		  HAL_Delay(50);
+		  HAL_Delay(10);
 	  }
 
-	  else if(receive == 'A')
+	  if(receive == 'A')
 	  {
 		  printf("\r\n");
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		  sprintf((char *)transmit, "F_LEFT\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_FL();
-		  HAL_Delay(50);
+		  HAL_Delay(10);
 	  }
 
-	  else if(receive == 'D')
+	  if(receive == 'D')
 	  {
 		  printf("\r\n");
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		  sprintf((char *)transmit, "F_RIGHT\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_FR();
-		  HAL_Delay(50);
+		  HAL_Delay(10);
 	  }
 
-	  else if(receive == 'Z')
+	  if(receive == 'Z')
 	  {
 		  printf("\r\n");
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		  sprintf((char *)transmit, "B_LEFT\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_BL();
-		  HAL_Delay(50);
+		  HAL_Delay(10);
 	  }
 
-	  else if(receive == 'C')
+	  if(receive == 'C')
 	  {
 		  printf("\r\n");
 		  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
 		  sprintf((char *)transmit, "B_RIGHT\n\r\n");
 		  HAL_UART_Transmit(&huart2, &transmit, strlen((char *)transmit), 100);
 		  smartcar_BR();
-		  HAL_Delay(50);
+		  HAL_Delay(10);
 	  }
 
 	  smartcar_S();
-
   }
   /* USER CODE END 3 */
 }
