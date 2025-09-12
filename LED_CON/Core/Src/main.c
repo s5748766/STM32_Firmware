@@ -79,12 +79,10 @@ void smartcar_F(void)
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
-	HAL_Delay(500);
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 1);
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 1);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 1);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 1);
-	HAL_Delay(500);
 }
 
 void smartcar_B(void)
@@ -93,12 +91,10 @@ void smartcar_B(void)
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
-	HAL_Delay(500);
 	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 1);
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 1);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 1);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 1);
-	HAL_Delay(500);
 }
 
 void smartcar_S(void)
@@ -107,12 +103,10 @@ void smartcar_S(void)
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
-	HAL_Delay(500);
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 0);
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
-	HAL_Delay(500);
 }
 
 void smartcar_FL(void)
@@ -121,12 +115,10 @@ void smartcar_FL(void)
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
-	HAL_Delay(500);
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 0);
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 1);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 1);
-	HAL_Delay(500);
 }
 
 
@@ -136,12 +128,10 @@ void smartcar_FR(void)
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
-	HAL_Delay(500);
 	HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 1);
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 1);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
-	HAL_Delay(500);
 }
 
 void smartcar_BL(void)
@@ -150,12 +140,10 @@ void smartcar_BL(void)
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
-	HAL_Delay(500);
 	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 0);
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 1);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 1);
-	HAL_Delay(500);
 }
 
 
@@ -165,12 +153,11 @@ void smartcar_BR(void)
 	HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
 	HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
 	HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
-	HAL_Delay(500);
+
 	HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 1);
 	HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 1);
 	HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
 	HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
-	HAL_Delay(500);
 }
 
 /* USER CODE END 0 */
