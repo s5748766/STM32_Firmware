@@ -282,43 +282,6 @@ int main(void)
 		  smartcar_S();
 	  }
 
-
-
-//	  HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(LFF_GPIO_Port, LFF_Pin, 0);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(LFB_GPIO_Port, LFB_Pin, 0);
-//	  HAL_Delay(500);
-//
-//	  HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(LBF_GPIO_Port, LBF_Pin, 0);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(LBB_GPIO_Port, LBB_Pin, 0);
-//	  HAL_Delay(500);
-//
-//	  HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(RFF_GPIO_Port, RFF_Pin, 0);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(RFB_GPIO_Port, RFB_Pin, 0);
-//	  HAL_Delay(500);
-//
-//	  HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(RBF_GPIO_Port, RBF_Pin, 0);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 1);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(RBB_GPIO_Port, RBB_Pin, 0);
-//	  HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }

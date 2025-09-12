@@ -21,7 +21,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include "string.h"
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,22 +42,124 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+TIM_HandleTypeDef htim1;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+uint8_t transmit[256];
+int L_echo_time = 0;
+int R_echo_time = 0;
+int L_dist = 0;
+int R_dist = 0;
+int HIGH = 1;
+int LOW = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
+static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
+
+PUTCHAR_PROTOTYPE
+{
+	if(ch == '\n')
+		HAL_UART_Transmit(&huart2, (uint8_t *)"\r", 1, 0xFFFF);
+		HAL_UART_Transmit(&huart2, (uint8_t *)&ch,        1, 0xFFFF);
+
+		return ch;
+}
+
+void timer_start(void)
+{
+   HAL_TIM_Base_Start(&htim1);
+   sprintf((char*)transmit, "=== HC-SR04 TEST===\r\n");
+   HAL_UART_Transmit(&huart2, transmit, strlen((char *)transmit), 1000);
+}
+
+void delay_us(uint16_t us)
+{
+   __HAL_TIM_SET_COUNTER(&htim1, 0); // initislize counter to start from 0
+   while((__HAL_TIM_GET_COUNTER(&htim1))<us); // wait count until us
+}
+
+void L_trig(void)
+{
+   HAL_GPIO_WritePin(L_TRIG_GPIO_Port, L_TRIG_Pin, HIGH);
+   delay_us(10);
+   HAL_GPIO_WritePin(L_TRIG_GPIO_Port, L_TRIG_Pin, LOW);
+}
+
+long unsigned int L_echo(void)
+{
+    long unsigned int echo = 0;
+
+    while(HAL_GPIO_ReadPin(L_ECHO_GPIO_Port, L_ECHO_Pin) == LOW){}
+         __HAL_TIM_SET_COUNTER(&htim1, 0);
+         while(HAL_GPIO_ReadPin(L_ECHO_GPIO_Port, L_ECHO_Pin) == HIGH);
+         echo = __HAL_TIM_GET_COUNTER(&htim1);
+    if( echo >= 240 && echo <= 23000 ) return echo;
+    else return 0;
+}
+
+void R_trig(void)
+{
+   HAL_GPIO_WritePin(R_TRIG_GPIO_Port, R_TRIG_Pin, HIGH);
+   delay_us(10);
+   HAL_GPIO_WritePin(R_TRIG_GPIO_Port, R_TRIG_Pin, LOW);
+}
+
+long unsigned int R_echo(void)
+{
+    long unsigned int echo = 0;
+
+    while(HAL_GPIO_ReadPin(R_ECHO_GPIO_Port, R_ECHO_Pin) == LOW){}
+         __HAL_TIM_SET_COUNTER(&htim1, 0);
+         while(HAL_GPIO_ReadPin(R_ECHO_GPIO_Port, R_ECHO_Pin) == HIGH);
+         echo = __HAL_TIM_GET_COUNTER(&htim1);
+    if( echo >= 240 && echo <= 23000 ) return echo;
+    else return 0;
+}
+
+void L_ultrasonic(void)
+{
+	L_trig();
+	L_echo_time = L_echo();
+	if(L_echo_time != 0)
+	{
+		L_dist = (int)(17 * L_echo_time / 100);
+		printf("L_Distance = %d(mm)\n", L_dist);
+	}
+	else
+		printf("Out of Range!\n");
+
+}
+
+void R_ultrasonic(void)
+{
+	R_trig();
+	R_echo_time = R_echo();
+	if(R_echo_time != 0)
+	{
+		R_dist = (int)(17 * R_echo_time / 100);
+		printf("R_Distance = %d(mm)\n", R_dist);
+	}
+	else
+		printf("Out of Range!\n");
+
+}
 
 /* USER CODE END 0 */
 
@@ -89,7 +193,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+
+  timer_start();
+
 
   /* USER CODE END 2 */
 
@@ -100,6 +208,9 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  L_ultrasonic();
+	  R_ultrasonic();
+	  HAL_Delay(50);
   }
   /* USER CODE END 3 */
 }
@@ -140,6 +251,52 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+}
+
+/**
+  * @brief TIM1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM1_Init(void)
+{
+
+  /* USER CODE BEGIN TIM1_Init 0 */
+
+  /* USER CODE END TIM1_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM1_Init 1 */
+
+  /* USER CODE END TIM1_Init 1 */
+  htim1.Instance = TIM1;
+  htim1.Init.Prescaler = 64-1;
+  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim1.Init.Period = 65535;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.RepetitionCounter = 0;
+  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM1_Init 2 */
+
+  /* USER CODE END TIM1_Init 2 */
+
 }
 
 /**
@@ -197,9 +354,6 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, LD2_Pin|L_TRIG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(R_ECHO_GPIO_Port, R_ECHO_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(R_TRIG_GPIO_Port, R_TRIG_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : B1_Pin */
@@ -207,6 +361,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : L_ECHO_Pin */
+  GPIO_InitStruct.Pin = L_ECHO_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(L_ECHO_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LD2_Pin L_TRIG_Pin */
   GPIO_InitStruct.Pin = LD2_Pin|L_TRIG_Pin;
@@ -217,9 +377,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : R_ECHO_Pin */
   GPIO_InitStruct.Pin = R_ECHO_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(R_ECHO_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : R_TRIG_Pin */
