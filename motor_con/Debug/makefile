@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := LED_CON
+BUILD_ARTIFACT_NAME := motor_con
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-LED_CON.elf \
+motor_con.elf \
 
 MAP_FILES += \
-LED_CON.map \
+motor_con.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-LED_CON.list \
+motor_con.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: LED_CON.elf secondary-outputs
+main-build: motor_con.elf secondary-outputs
 
 # Tool invocations
-LED_CON.elf LED_CON.map: $(OBJS) $(USER_OBJS) C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\LED_CON\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "LED_CON.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\LED_CON\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LED_CON.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+motor_con.elf motor_con.map: $(OBJS) $(USER_OBJS) C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\motor_con\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "motor_con.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\motor_con\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="motor_con.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-LED_CON.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "LED_CON.list"
+motor_con.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "motor_con.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) LED_CON.elf LED_CON.list LED_CON.map default.size.stdout
+	-$(RM) default.size.stdout motor_con.elf motor_con.list motor_con.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

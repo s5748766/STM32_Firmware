@@ -60,8 +60,8 @@ all: main-build
 main-build: TIM_TimeBase.elf secondary-outputs
 
 # Tool invocations
-TIM_TimeBase.elf TIM_TimeBase.map: $(OBJS) $(USER_OBJS) C:\Users\50\STM32CubeIDE\workspace_1.18.1\TIM_TimeBase\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "TIM_TimeBase.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\STM32CubeIDE\workspace_1.18.1\TIM_TimeBase\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TIM_TimeBase.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+TIM_TimeBase.elf TIM_TimeBase.map: $(OBJS) $(USER_OBJS) C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\TIM_TimeBase\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "TIM_TimeBase.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\TIM_TimeBase\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="TIM_TimeBase.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
