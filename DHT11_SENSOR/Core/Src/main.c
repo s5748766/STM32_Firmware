@@ -272,7 +272,7 @@ int main(void)
 	    }
 
 	    // 2초 대기 (DHT11은 최소 2초 간격으로 읽어야 함)
-	    HAL_Delay(2000);
+	    HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
