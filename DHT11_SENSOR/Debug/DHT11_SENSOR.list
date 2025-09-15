@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  0000405c  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0000aed3  00000000  00000000  00004085  2**0
+ 12 .debug_info   0000aee8  00000000  00000000  00004085  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 00001934  00000000  00000000  0000ef58  2**0
+ 13 .debug_abbrev 0000192a  00000000  00000000  0000ef6d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000bb8  00000000  00000000  00010890  2**3
+ 14 .debug_aranges 00000bb8  00000000  00000000  00010898  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 00000930  00000000  00000000  00011448  2**0
+ 15 .debug_rnglists 00000930  00000000  00000000  00011450  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00017938  00000000  00000000  00011d78  2**0
+ 16 .debug_macro  00017946  00000000  00000000  00011d80  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000c82d  00000000  00000000  000296b0  2**0
+ 17 .debug_line   0000c844  00000000  00000000  000296c6  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0008a664  00000000  00000000  00035edd  2**0
+ 18 .debug_str    0008a672  00000000  00000000  00035f0a  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000c0541  2**0
+ 19 .comment      00000043  00000000  00000000  000c057c  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00003650  00000000  00000000  000c0584  2**2
+ 20 .debug_frame  00003650  00000000  00000000  000c05c0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000065  00000000  00000000  000c3bd4  2**0
+ 21 .debug_line_str 00000065  00000000  00000000  000c3c10  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -88,10 +88,10 @@ Disassembly of section .text:
  800015a:	4770      	bx	lr
 
 0800015c <DHT11_SetPinOutput>:
-  HAL_UART_Transmit (&huart2, (uint8_t*) &ch, 1, 0xFFFF);
-
-  return ch;
-}
+    uint8_t temp_decimal;
+    uint8_t hum_decimal;
+    uint8_t checksum;
+} DHT11_Data;
 
 void DHT11_SetPinOutput(void) {
  800015c:	b580      	push	{r7, lr}
