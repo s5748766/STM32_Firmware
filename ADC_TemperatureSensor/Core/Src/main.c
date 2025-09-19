@@ -48,6 +48,9 @@ UART_HandleTypeDef huart2;
 const float AVG_SLOPE = 4.3E-03;
 const float V25 = 1.43;
 const float ADC_TO_VOLT = 3.3 / 4096;
+uint16_t adc1;
+float vSense;
+float temp;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -126,18 +129,16 @@ int main(void)
 	  Error_Handler();
   }
 
-  uint16_t adc1;
-  float vSense;
-  float temp;
+
 
   while (1)
   {
-	  HAL_ADC_PollForConversion(&hadc1, 100);
-	  adc1 = HAL_ADC_GetValue(&hadc1);
-	  vSense = adc1 * ADC_TO_VOLT;
-	  temp = (V25 - vSense) / AVG_SLOPE + 25.0;
+	  HAL_ADC_PollForConversion(&hadc1, 100); // adc1에서 제공하는 컨버젼 함수
+	  adc1 = HAL_ADC_GetValue(&hadc1); //adc1 데이터 가져오기
+	  vSense = adc1 * ADC_TO_VOLT; // adc1 데이터 * (3.3 / 4096) = 센서 데이터
+	  temp = (V25 - vSense) / AVG_SLOPE + 25.0; //온도 값 = (1.43 - 센서데이터) / 4.3E-03 +25.0
 
-	  printf("ADC1 temperature : %d\r\n", adc1);
+	  printf("ADC1 temperature : %d\r\n", temp);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
