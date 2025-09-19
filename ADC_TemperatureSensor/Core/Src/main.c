@@ -45,7 +45,9 @@ ADC_HandleTypeDef hadc1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+const float AVG_SLOPE = 4.3E-03;
+const float V25 = 1.43;
+const float ADC_TO_VOLT = 3.3 / 4096;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,7 +56,7 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
-
+s
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -125,17 +127,15 @@ int main(void)
   }
 
   uint16_t adc1;
-  float t;
-  int16_t bf[10] = {0};
-  uint8_t i = 0;
-  uint8_t j;
-  int16_t sum = 0;
+  float vSense;
+  float temp;
 
   while (1)
   {
 	  HAL_ADC_PollForConversion(&hadc1, 100);
 	  adc1 = HAL_ADC_GetValue(&hadc1);
-	  t = (float)adc1[4] * 3.3 / 0xfff;
+	  vSense = adc1 * ADC_TO_VOLT;
+	  temp = (V25 - vSense) / AVG_SLOPE + 25.0;
 
 	  printf("ADC1 temperature : %d\r\n", adc1);
     /* USER CODE END WHILE */

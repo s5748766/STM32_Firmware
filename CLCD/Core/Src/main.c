@@ -158,8 +158,8 @@ int main(void)
 	      // 데이터 읽기 성공
 	      LCD_XY(0, 0) ; LCD_CLEAR();
 	      LCD_XY(0, 1) ; LCD_CLEAR();
-	      sprintf(temp, "Temperature: %d°C", dht11_data.temperature);
-	      sprintf(hum, "Humidity: %d%%", dht11_data.humidity);
+	      sprintf(temp, "Temperature:%dC", dht11_data.temperature);
+	      sprintf(hum, "Humidity:%d%%", dht11_data.humidity);
 	      LCD_XY(0, 0) ; LCD_PUTS((char *) temp);
 	      LCD_XY(0, 1) ; LCD_PUTS((char *) hum);
 	      HAL_UART_Transmit(&huart2, (uint8_t*)buff, strlen(buff), HAL_MAX_DELAY);

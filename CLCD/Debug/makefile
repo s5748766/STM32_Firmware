@@ -60,8 +60,8 @@ all: main-build
 main-build: CLCD.elf secondary-outputs
 
 # Tool invocations
-CLCD.elf CLCD.map: $(OBJS) $(USER_OBJS) C:\Users\50\STM32CubeIDE\workspace_1.18.1\CLCD\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "CLCD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\STM32CubeIDE\workspace_1.18.1\CLCD\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CLCD.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+CLCD.elf CLCD.map: $(OBJS) $(USER_OBJS) C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\CLCD\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "CLCD.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\CLCD\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="CLCD.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
