@@ -34,5 +34,8 @@
 ### SERVO MOTOR CONTROL
 - 서보 모터를 제어
 
-### DHT11_SENSOR
+### DHT11 SENSOR
 - DHT11 센서를 이용하여 온습도 측정
+
+### CLCD Display
+- CLCD 디스플레이에 문자 출력 및 DHT11 센서 값 표시
