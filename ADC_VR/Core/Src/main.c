@@ -42,13 +42,17 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+TIM_HandleTypeDef htim2;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 const float AVG_SLOPE = 4.3E-03;      // slope (gradient) of temperature line function
 const float V25 = 1.43;               // sensor's voltage at 25°C [V]
 const float ADC_TO_VOLT = 3.3 / 4096;
-char tx_data[50];
+char 		tx_data[50];
+uint16_t	pwm1 = 0;
+uint16_t 	adc1 = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,6 +60,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -96,12 +101,14 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
   /* Start calibration */
   if (HAL_ADCEx_Calibration_Start (&hadc1) != HAL_OK)
     {
@@ -114,13 +121,21 @@ int main(void)
       Error_Handler();
     }
 
-  uint16_t adc1;
+
   while (1)
   {
-	  HAL_ADC_PollForConversion (&hadc1, 100);
-	  adc1 = HAL_ADC_GetValue (&hadc1);
-	  sprintf(tx_data, "ADC Value : %d\r\n", adc1);
-	  HAL_UART_Transmit(&huart2, tx_data, sizeof(tx_data), HAL_MAX_DELAY);
+ 	  if(HAL_ADC_PollForConversion (&hadc1, 100) == HAL_OK)
+	  {
+		  adc1 = HAL_ADC_GetValue (&hadc1);
+		  sprintf(tx_data, "ADC Value : %d\r\n", adc1);
+		  HAL_UART_Transmit(&huart2, tx_data, sizeof(tx_data), HAL_MAX_DELAY);
+
+		  pwm1 = (adc1* 1000) / 4095;
+		  sprintf(tx_data, "PWM Value : %d\r\n", pwm1);
+		  HAL_UART_Transmit(&huart2, tx_data, sizeof(tx_data), HAL_MAX_DELAY);
+		  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pwm1);
+	  }
+ 	  HAL_Delay(10);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -217,6 +232,55 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 64-1;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = 1000-1;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
+  HAL_TIM_MspPostInit(&htim2);
 
 }
 
