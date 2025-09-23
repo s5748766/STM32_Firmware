@@ -134,6 +134,9 @@ int main(void)
 		  sprintf(tx_data, "PWM Value : %d\r\n", pwm1);
 		  HAL_UART_Transmit(&huart2, tx_data, sizeof(tx_data), HAL_MAX_DELAY);
 		  __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, pwm1);
+
+		  sprintf(tx_data, "voltage Value : %d\r\n", ADC_TO_VOLT);
+		  HAL_UART_Transmit(&huart2, tx_data, sizeof(tx_data), HAL_MAX_DELAY);
 	  }
  	  HAL_Delay(10);
     /* USER CODE END WHILE */

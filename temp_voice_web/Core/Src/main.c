@@ -45,6 +45,7 @@
 TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
 uint8_t rx_dat;
@@ -57,6 +58,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void DHT11_SetPinOutput(void);
 void DHT11_SetPinInput(void);
@@ -105,6 +107,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim2);
   /* USER CODE END 2 */
@@ -113,7 +116,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_UART_Receive(&huart2, &rx_dat, sizeof(rx_dat), 10);
+	  HAL_UART_Receive(&huart3, &rx_dat, sizeof(rx_dat), 10);
 	  if(rx_dat == '1')
 	  {
 		  printf("LED On\n");
@@ -128,20 +131,23 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  if (DHT11_ReadData(&dht11_data))
-	  {
-	  // 데이터 읽기 성공
-	  	sprintf(buff, "Temperature: %d°C, Humidity: %d%%\r\n",
-	  	dht11_data.temperature, dht11_data.humidity);
-	  	HAL_UART_Transmit(&huart2, (uint8_t*)buff, strlen(buff), HAL_MAX_DELAY);
-	  }
-
-	  else
-	  {
-	  // 데이터 읽기 실패
-	  	sprintf(buff, "DHT11 Read Error!\r\n");
-	  	HAL_UART_Transmit(&huart2, (uint8_t*)buff, strlen(buff), HAL_MAX_DELAY);
-	  }
+	  sprintf(buff, "Temperature: %d°C, Humidity: %d%%\r\n",
+			  dht11_data.temperature, dht11_data.humidity);
+	  HAL_UART_Transmit(&huart3, (uint8_t*)buff, strlen(buff), HAL_MAX_DELAY);
+//	  if (DHT11_ReadData(&dht11_data))
+//	  {
+//	  // 데이터 읽기 성공
+//	  	sprintf(buff, "Temperature: %d°C, Humidity: %d%%\r\n",
+//	  	dht11_data.temperature, dht11_data.humidity);
+//	  	HAL_UART_Transmit(&huart2, (uint8_t*)buff, strlen(buff), HAL_MAX_DELAY);
+//	  }
+//
+//	  else
+//	  {
+//	  // 데이터 읽기 실패
+//	  	sprintf(buff, "DHT11 Read Error!\r\n");
+//	  	HAL_UART_Transmit(&huart2, (uint8_t*)buff, strlen(buff), HAL_MAX_DELAY);
+//	  }
 
 	  // 2초 대기 (DHT11은 최소 2초 간격으로 읽어야 함)
 	  HAL_Delay(500);
@@ -262,6 +268,39 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * @brief USART3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART3_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART3_Init 0 */
+
+  /* USER CODE END USART3_Init 0 */
+
+  /* USER CODE BEGIN USART3_Init 1 */
+
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 9600;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART3_Init 2 */
+
+  /* USER CODE END USART3_Init 2 */
 
 }
 

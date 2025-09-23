@@ -7,9 +7,10 @@
 ../Core/Inc/DHT11.h:92:9:DHT11_ReadBit	8	static
 ../Core/Inc/DHT11.h:109:9:DHT11_ReadByte	24	static
 ../Core/Inc/DHT11.h:117:9:DHT11_ReadData	24	static
-../Core/Src/main.c:81:5:main	8	static
-../Core/Src/main.c:156:6:SystemClock_Config	72	static
-../Core/Src/main.c:195:13:MX_TIM2_Init	32	static
-../Core/Src/main.c:240:13:MX_USART2_UART_Init	8	static
-../Core/Src/main.c:273:13:MX_GPIO_Init	40	static
-../Core/Src/main.c:325:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:83:5:main	8	static
+../Core/Src/main.c:162:6:SystemClock_Config	72	static
+../Core/Src/main.c:201:13:MX_TIM2_Init	32	static
+../Core/Src/main.c:246:13:MX_USART2_UART_Init	8	static
+../Core/Src/main.c:279:13:MX_USART3_UART_Init	8	static
+../Core/Src/main.c:312:13:MX_GPIO_Init	40	static
+../Core/Src/main.c:364:6:Error_Handler	4	static,ignoring_inline_asm
