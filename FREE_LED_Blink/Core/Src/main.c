@@ -342,15 +342,16 @@ void StartTask02(void *argument)
   /* USER CODE BEGIN StartTask02 */
 	/* Infinite loop */
 	  const TickType_t debounce = pdMS_TO_TICKS(50); // 50ms 디바운스
-	  GPIO_PinState lastStable = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
-	  TickType_t changeTick = 0;
-	  uint8_t task3Paused = 0;
+	  GPIO_PinState lastStable = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin); // 버튼을 눌렀을때의 마지막 스테이터스 저장 변수 선언
+	  TickType_t changeTick = 0; // 시간 변화 저장 변수
+	  uint8_t task3Paused = 0; // task03 퍼즈 시 시간 저장 변수
 
 	  for(;;)
 	  {
 	    GPIO_PinState now = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
 
-	    if (now != lastStable) {
+	    if (now != lastStable)
+	    {
 	      if (changeTick == 0) changeTick = xTaskGetTickCount();
 
 	      if ((xTaskGetTickCount() - changeTick) >= debounce) {
@@ -358,15 +359,20 @@ void StartTask02(void *argument)
 	        changeTick = 0;
 
 	        // ★ Nucleo PC13: 액티브-로우 (눌림 == GPIO_PIN_RESET)
-	        if (lastStable == GPIO_PIN_RESET) {           // 버튼 '눌림' 확정 → Task3 잠시 멈춤
-	          if (!task3Paused) {
+	        if (lastStable == GPIO_PIN_RESET)
+	        {           // 버튼 '눌림' 확정 → Task3 잠시 멈춤
+	          if (!task3Paused)
+	          {
 	            osThreadSuspend(Toggle_LEDHandle);
 	            task3Paused = 1;
 	            printf("Task3 PAUSE\r\n");
 	            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
 	          }
-	        } else {                                      // 버튼 '뗌' 확정 → Task3 재개
-	          if (task3Paused) {
+	        }
+	        else
+	        {                                      // 버튼 '뗌' 확정 → Task3 재개
+	          if (task3Paused)
+	          {
 	            osThreadResume(Toggle_LEDHandle);
 	            task3Paused = 0;
 	            printf("Task3 RESUME\r\n");
@@ -374,7 +380,9 @@ void StartTask02(void *argument)
 	          }
 	        }
 	      }
-	    } else {
+	    }
+	    else
+	    {
 	      changeTick = 0; // 변화 없음
 	    }
 
