@@ -60,8 +60,8 @@ all: main-build
 main-build: gpio_led_con.elf secondary-outputs
 
 # Tool invocations
-gpio_led_con.elf gpio_led_con.map: $(OBJS) $(USER_OBJS) C:\Users\50\STM32CubeIDE\workspace_1.18.1\gpio_led_con\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "gpio_led_con.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\STM32CubeIDE\workspace_1.18.1\gpio_led_con\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="gpio_led_con.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+gpio_led_con.elf gpio_led_con.map: $(OBJS) $(USER_OBJS) C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\gpio_led_con\STM32F103RBTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "gpio_led_con.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m3 -T"C:\Users\50\AppData\Roaming\SPB_Data\git\STM32_Firmware\gpio_led_con\STM32F103RBTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="gpio_led_con.map" -Wl,--gc-sections -static --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

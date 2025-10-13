@@ -514,6 +514,133 @@ Discarded input sections
  .debug_macro   0x00000000      0x140 ./Core/Src/system_stm32f1xx.o
  .debug_macro   0x00000000      0x28e ./Core/Src/system_stm32f1xx.o
  .debug_macro   0x00000000       0x83 ./Core/Src/system_stm32f1xx.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .group         0x00000000        0xc ./Core/Src/uart2_printf.o
+ .text          0x00000000        0x0 ./Core/Src/uart2_printf.o
+ .data          0x00000000        0x0 ./Core/Src/uart2_printf.o
+ .bss           0x00000000        0x0 ./Core/Src/uart2_printf.o
+ .rodata        0x00000000        0x2 ./Core/Src/uart2_printf.o
+ .text.__io_putchar
+                0x00000000       0x3c ./Core/Src/uart2_printf.o
+ .debug_info    0x00000000      0x5b1 ./Core/Src/uart2_printf.o
+ .debug_abbrev  0x00000000      0x15b ./Core/Src/uart2_printf.o
+ .debug_aranges
+                0x00000000       0x20 ./Core/Src/uart2_printf.o
+ .debug_rnglists
+                0x00000000       0x13 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x276 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0xacc ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x215 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x2e ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x8e ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x51 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x103 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x6a ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x1df ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x1c ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x22 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0xbd ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0xd23 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000     0xe09e ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x6d ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000     0x34a2 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x190 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x5c ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x5bc ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x289 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x1cb ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x114 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x1b2 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x27 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x136 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x1bc ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x34 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x3c ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x57 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x87 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x240 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x140 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x28e ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x83 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x61 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x24 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x43 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x34 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x16 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x3c ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x370 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x10 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x16 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x4a ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x34 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x10 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x58 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x8e ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x1c ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x185 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x16 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000       0x16 ./Core/Src/uart2_printf.o
+ .debug_macro   0x00000000      0x146 ./Core/Src/uart2_printf.o
+ .debug_line    0x00000000      0x82a ./Core/Src/uart2_printf.o
+ .debug_str     0x00000000    0x805c3 ./Core/Src/uart2_printf.o
+ .comment       0x00000000       0x44 ./Core/Src/uart2_printf.o
+ .debug_frame   0x00000000       0x34 ./Core/Src/uart2_printf.o
+ .ARM.attributes
+                0x00000000       0x2d ./Core/Src/uart2_printf.o
  .text          0x00000000       0x14 ./Core/Startup/startup_stm32f103rbtx.o
  .data          0x00000000        0x0 ./Core/Startup/startup_stm32f103rbtx.o
  .bss           0x00000000        0x0 ./Core/Startup/startup_stm32f103rbtx.o
@@ -2036,6 +2163,7 @@ LOAD ./Core/Src/stm32f1xx_it.o
 LOAD ./Core/Src/syscalls.o
 LOAD ./Core/Src/sysmem.o
 LOAD ./Core/Src/system_stm32f1xx.o
+LOAD ./Core/Src/uart2_printf.o
 LOAD ./Core/Startup/startup_stm32f103rbtx.o
 LOAD ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
 LOAD ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
@@ -2906,20 +3034,20 @@ LOAD C:/ST/STM32CubeIDE_1.18.1/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x00004ce3      0xe34 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
  .debug_line    0x00005b17     0x2497 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
 
-.debug_str      0x00000000    0x83db3
- .debug_str     0x00000000    0x83db3 ./Core/Src/main.o
-                              0x80e08 (size before relaxing)
- .debug_str     0x00083db3    0x7cfee ./Core/Src/stm32f1xx_hal_msp.o
- .debug_str     0x00083db3    0x7cbc0 ./Core/Src/stm32f1xx_it.o
- .debug_str     0x00083db3     0x9985 ./Core/Src/syscalls.o
- .debug_str     0x00083db3     0x7723 ./Core/Src/sysmem.o
- .debug_str     0x00083db3    0x7ca52 ./Core/Src/system_stm32f1xx.o
- .debug_str     0x00083db3       0x7d ./Core/Startup/startup_stm32f103rbtx.o
- .debug_str     0x00083db3    0x7d185 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
- .debug_str     0x00083db3    0x7d0d1 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
- .debug_str     0x00083db3    0x7cdd8 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
- .debug_str     0x00083db3    0x7ce81 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
- .debug_str     0x00083db3    0x7d4f2 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
+.debug_str      0x00000000    0x83dfa
+ .debug_str     0x00000000    0x83dfa ./Core/Src/main.o
+                              0x80e16 (size before relaxing)
+ .debug_str     0x00083dfa    0x7cffc ./Core/Src/stm32f1xx_hal_msp.o
+ .debug_str     0x00083dfa    0x7cbce ./Core/Src/stm32f1xx_it.o
+ .debug_str     0x00083dfa     0x9993 ./Core/Src/syscalls.o
+ .debug_str     0x00083dfa     0x7731 ./Core/Src/sysmem.o
+ .debug_str     0x00083dfa    0x7ca60 ./Core/Src/system_stm32f1xx.o
+ .debug_str     0x00083dfa       0x7d ./Core/Startup/startup_stm32f103rbtx.o
+ .debug_str     0x00083dfa    0x7d185 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.o
+ .debug_str     0x00083dfa    0x7d0d1 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.o
+ .debug_str     0x00083dfa    0x7cdd8 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.o
+ .debug_str     0x00083dfa    0x7ce81 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.o
+ .debug_str     0x00083dfa    0x7d4f2 ./Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.o
 
 .comment        0x00000000       0x43
  .comment       0x00000000       0x43 ./Core/Src/main.o
