@@ -1,0 +1,9 @@
+../Core/Src/main.c:101:1:__io_putchar	2
+../Core/Src/main.c:116:5:main	1
+../Core/Src/main.c:202:6:SystemClock_Config	3
+../Core/Src/main.c:241:13:MX_USART2_UART_Init	2
+../Core/Src/main.c:274:13:MX_GPIO_Init	1
+../Core/Src/main.c:323:6:StartDefaultTask	1
+../Core/Src/main.c:340:6:StartTask02	7
+../Core/Src/main.c:408:6:StartTask03	1
+../Core/Src/main.c:424:6:Error_Handler	1
