@@ -341,59 +341,44 @@ void StartTask02(void *argument)
 {
   /* USER CODE BEGIN StartTask02 */
 	/* Infinite loop */
-	  // 디바운싱용
-	  const TickType_t debounceMs = 50;           // 50ms
-	  TickType_t lastChangeTick = 0;
+	  const TickType_t debounce = pdMS_TO_TICKS(50); // 50ms 디바운스
 	  GPIO_PinState lastStable = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
-
-	  // Task3(=Toggle_LED)의 정지 상태 추적
+	  TickType_t changeTick = 0;
 	  uint8_t task3Paused = 0;
 
 	  for(;;)
 	  {
 	    GPIO_PinState now = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
 
-	    // 상태가 바뀐 것처럼 보이면, 일정 시간(디바운스) 후에만 확정
-	    if (now != lastStable)
-	    {
-	      // 처음 변화 감지 시각을 기록
-	      if (lastChangeTick == 0)
-	        lastChangeTick = xTaskGetTickCount();
+	    if (now != lastStable) {
+	      if (changeTick == 0) changeTick = xTaskGetTickCount();
 
-	      // 변화가 debounceMs 이상 지속되면 안정된 변화로 인정
-	      if ((xTaskGetTickCount() - lastChangeTick) >= pdMS_TO_TICKS(debounceMs))
-	      {
-	        lastStable = now;          // 안정된 현재 상태로 확정
-	        lastChangeTick = 0;        // 타이머 초기화
+	      if ((xTaskGetTickCount() - changeTick) >= debounce) {
+	        lastStable = now;
+	        changeTick = 0;
 
-	        if (lastStable == GPIO_PIN_SET)   // ★ 버튼 '눌림'으로 확정
-	        {
+	        // ★ Nucleo PC13: 액티브-로우 (눌림 == GPIO_PIN_RESET)
+	        if (lastStable == GPIO_PIN_RESET) {           // 버튼 '눌림' 확정 → Task3 잠시 멈춤
 	          if (!task3Paused) {
-	            osThreadSuspend(Toggle_LEDHandle);  // → 눌려있는 동안 task3 일시정지
+	            osThreadSuspend(Toggle_LEDHandle);
 	            task3Paused = 1;
 	            printf("Task3 PAUSE\r\n");
+	            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
+	          }
+	        } else {                                      // 버튼 '뗌' 확정 → Task3 재개
+	          if (task3Paused) {
+	            osThreadResume(Toggle_LEDHandle);
+	            task3Paused = 0;
+	            printf("Task3 RESUME\r\n");
 	            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
 	          }
 	        }
-	        else                                // ★ 버튼 '뗌'으로 확정
-	        {
-	          if (task3Paused) {
-	            osThreadResume(Toggle_LEDHandle);   // → 떼자마자 task3 재개
-	            task3Paused = 0;
-	            printf("Task3 RESUME\r\n");
-	            HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-	          }
-	        }
 	      }
-	    }
-	    else
-	    {
-	      // 변화 없음: 타이머 초기화
-	      lastChangeTick = 0;
+	    } else {
+	      changeTick = 0; // 변화 없음
 	    }
 
-	    // 폴링 주기 (부하/응답성 균형)
-	    osDelay(5);
+	    osDelay(5); // 폴링 주기
 	  }
   /* USER CODE END StartTask02 */
 }
