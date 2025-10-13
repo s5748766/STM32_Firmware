@@ -5,7 +5,7 @@
 - LD2 LED에 HIGH, LOW 신호 보내기
 - HAL_GPIO_WritePin(); 사용
 
-### UART COMMUNICTION
+### UART Communication
 - Teraterm 터미널에 특정 문자, 숫자 보내기
 - HAL_UART_Receive(); 사용
 - HAL_UART_Transmit(); 사용
@@ -39,3 +39,23 @@
 
 ### CLCD Display
 - CLCD 디스플레이에 문자 출력 및 DHT11 센서 값 표시
+
+### ADC 가변저항
+- ADC 핀을 이용하여 가변저항의 전압 값 측정
+
+### 온습도 WEB Service
+- 온습도 데이터 값을 시리얼 통신으로 웹에 전달 
+
+### 온습도 및 소리 WEB Service
+- 온습도 데이터 값을 시리얼 통신으로 웹에 전달 및 웹(PC)에서의 소리 측정 후 피크 값 이상의 소리 발생 시 LED ON/OFF제어
+
+### Bluetooth Communication
+- 블루투스 모듈을 이용하여 웹에 온습도 센서 데이터 및 웹에서 소리 감지 후 디바이스 led ON/OFF제어
+
+### Multi Task
+- timer와 외부 인터럽트를 이용하여 led 토글 중 인터럽트 시 기존 led 토글 stop 후 다른 led on/off 제어
+
+### Free_LED_Blink
+- FreeRTOS를 이용하여 Multi Task와 같이 led 토글 중 버튼 클릭 시 기존 led 토글 stop 후 다른 led on/off 제어
+
+
