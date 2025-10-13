@@ -115,8 +115,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 		}
-
-
 	}
 
 }
