@@ -32,10 +32,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define K24C256_ADDR        0xA0    // K24C256 I2C 주소 (A0,A1,A2 = 000)
-#define EEPROM_PAGE_SIZE    64      // K24C256 페이지 크기 (64 bytes)
-#define EEPROM_SIZE         32768   // K24C256 총 크기 (32KB)
-#define TEST_ADDRESS        0x0000  // 테스트용 주소
+#define ADC_BUFFER_SIZE 2
+#define FILTER_SIZE 8        // 이동평균 필터 크기
+#define ADC_MAX_VALUE 4095   // 12bit ADC 최대값
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,25 +43,46 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
+
+TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t i2c_scan_found = 0;
-uint8_t eeprom_address = 0;
+uint16_t adc_buffer[ADC_BUFFER_SIZE];  // DMA 버퍼
+uint16_t joystick_x_raw = 0;           // 조이스틱 X축 원시값
+uint16_t joystick_y_raw = 0;           // 조이스틱 Y축 원시값
+
+// 이동평균 필터를 위한 배열
+uint32_t x_filter_buffer[FILTER_SIZE] = { 0 };
+uint32_t y_filter_buffer[FILTER_SIZE] = { 0 };
+uint8_t filter_index = 0;
+
+// 필터링된 값
+uint16_t joystick_x_filtered = 0;
+uint16_t joystick_y_filtered = 0;
+
+// 백분율로 변환된 값 (-100 ~ +100)
+int16_t joystick_x_percent = 0;
+int16_t joystick_y_percent = 0;
+
+char uart_buffer[100];  // 필요시 사용할 버퍼 (현재는 printf 사용)
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_I2C1_Init(void);
+static void MX_ADC1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void I2C_Scan(void);
-HAL_StatusTypeDef EEPROM_Write(uint16_t mem_addr, uint8_t *data, uint16_t size);
-HAL_StatusTypeDef EEPROM_Read(uint16_t mem_addr, uint8_t *data, uint16_t size);
-void EEPROM_Test(void);
+void process_joystick_data(void);
+uint16_t apply_moving_average_filter(uint16_t new_value,
+		uint32_t *filter_buffer);
+int16_t convert_to_percentage(uint16_t adc_value);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -82,7 +102,7 @@ void EEPROM_Test(void);
  */
 PUTCHAR_PROTOTYPE {
 	/* Place your implementation of fputc here */
-	/* e.g. write a character to the USART2 and Loop until the end of transmission */
+	/* e.g. write a character to the USART1 and Loop until the end of transmission */
 	if (ch == '\n')
 		HAL_UART_Transmit(&huart2, (uint8_t*) "\r", 1, 0xFFFF);
 	HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1, 0xFFFF);
@@ -91,175 +111,106 @@ PUTCHAR_PROTOTYPE {
 }
 
 /**
- * @brief  I2C 주소 스캔 함수
+ * @brief  이동평균 필터 적용
+ * @param  new_value: 새로운 ADC 값
+ * @param  filter_buffer: 필터 버퍼 포인터
+ * @retval 필터링된 값
+ */
+uint16_t apply_moving_average_filter(uint16_t new_value,
+		uint32_t *filter_buffer) {
+	static uint8_t x_init = 0, y_init = 0;
+	uint32_t sum = 0;
+
+	// 필터 버퍼 구분 (X축 또는 Y축)
+	if (filter_buffer == x_filter_buffer) {
+		if (!x_init) {
+			// 초기화: 모든 버퍼를 첫 번째 값으로 채움
+			for (int i = 0; i < FILTER_SIZE; i++) {
+				filter_buffer[i] = new_value;
+			}
+			x_init = 1;
+			return new_value;
+		}
+	} else {
+		if (!y_init) {
+			// 초기화: 모든 버퍼를 첫 번째 값으로 채움
+			for (int i = 0; i < FILTER_SIZE; i++) {
+				filter_buffer[i] = new_value;
+			}
+			y_init = 1;
+			return new_value;
+		}
+	}
+
+	// 새로운 값을 버퍼에 추가
+	filter_buffer[filter_index] = new_value;
+
+	// 평균 계산
+	for (int i = 0; i < FILTER_SIZE; i++) {
+		sum += filter_buffer[i];
+	}
+
+	return (uint16_t) (sum / FILTER_SIZE);
+}
+
+/**
+ * @brief  ADC 값을 백분율로 변환 (-100 ~ +100)
+ * @param  adc_value: ADC 값 (0 ~ 4095)
+ * @retval 백분율 값
+ */
+int16_t convert_to_percentage(uint16_t adc_value) {
+	// ADC 중앙값을 기준으로 -100 ~ +100으로 변환
+	int16_t centered_value = (int16_t) adc_value - (ADC_MAX_VALUE / 2);
+	int16_t percentage = (centered_value * 100) / (ADC_MAX_VALUE / 2);
+
+	// 범위 제한
+	if (percentage > 100)
+		percentage = 100;
+	if (percentage < -100)
+		percentage = -100;
+
+	return percentage;
+}
+
+/**
+ * @brief  조이스틱 데이터 처리
  * @param  None
  * @retval None
  */
-void I2C_Scan(void) {
-	printf("\n=== I2C Address Scan ===\n");
-	printf("Scanning I2C bus...\n");
+void process_joystick_data(void) {
+	// 원시 ADC 값 읽기
+	joystick_x_raw = adc_buffer[0];  // ADC Channel 0 (PA0)
+	joystick_y_raw = adc_buffer[1];  // ADC Channel 1 (PA1)
 
-	i2c_scan_found = 0;
+	// 이동평균 필터 적용
+	joystick_x_filtered = apply_moving_average_filter(joystick_x_raw,
+			x_filter_buffer);
+	joystick_y_filtered = apply_moving_average_filter(joystick_y_raw,
+			y_filter_buffer);
 
-	for (uint8_t i = 0; i < 128; i++) {
-		if (HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t) (i << 1), 3, 5)
-				== HAL_OK) {
-			printf("Found I2C device at address: 0x%02X (7-bit: 0x%02X)\n",
-					(i << 1), i);
-			i2c_scan_found++;
+	// 필터 인덱스 업데이트 (두 축 공통 사용)
+	filter_index = (filter_index + 1) % FILTER_SIZE;
 
-			// K24C256 주소 범위 확인 (0xA0~0xAE)
-			if ((i << 1) >= 0xA0 && (i << 1) <= 0xAE) {
-				eeprom_address = (i << 1);
-				printf("** K24C256 EEPROM detected at 0x%02X **\n",
-						eeprom_address);
-			}
-		}
-	}
-
-	if (i2c_scan_found == 0) {
-		printf("No I2C devices found!\n");
-	} else {
-		printf("Total %d I2C device(s) found.\n", i2c_scan_found);
-	}
-	printf("========================\n\n");
+	// 백분율로 변환
+	joystick_x_percent = convert_to_percentage(joystick_x_filtered);
+	joystick_y_percent = convert_to_percentage(joystick_y_filtered);
 }
 
 /**
- * @brief  EEPROM 쓰기 함수
- * @param  mem_addr: 메모리 주소
- * @param  data: 쓸 데이터 포인터
- * @param  size: 데이터 크기
- * @retval HAL_StatusTypeDef
- */
-HAL_StatusTypeDef EEPROM_Write(uint16_t mem_addr, uint8_t *data, uint16_t size) {
-	HAL_StatusTypeDef status = HAL_OK;
-	uint16_t bytes_to_write;
-	uint16_t current_addr = mem_addr;
-	uint16_t data_index = 0;
-
-	while (size > 0) {
-		// 페이지 경계를 고려한 쓰기 크기 계산
-		bytes_to_write = EEPROM_PAGE_SIZE - (current_addr % EEPROM_PAGE_SIZE);
-		if (bytes_to_write > size)
-			bytes_to_write = size;
-
-		// EEPROM에 쓰기
-		status = HAL_I2C_Mem_Write(&hi2c1, eeprom_address, current_addr,
-		I2C_MEMADD_SIZE_16BIT, &data[data_index], bytes_to_write,
-				HAL_MAX_DELAY);
-
-		if (status != HAL_OK) {
-			printf("EEPROM Write Error at address 0x%04X\n", current_addr);
-			return status;
-		}
-
-		// EEPROM 쓰기 완료 대기 (Write Cycle Time)
-		HAL_Delay(5);
-
-		// 다음 쓰기를 위한 변수 업데이트
-		current_addr += bytes_to_write;
-		data_index += bytes_to_write;
-		size -= bytes_to_write;
-	}
-
-	return status;
-}
-
-/**
- * @brief  EEPROM 읽기 함수
- * @param  mem_addr: 메모리 주소
- * @param  data: 읽을 데이터 포인터
- * @param  size: 데이터 크기
- * @retval HAL_StatusTypeDef
- */
-HAL_StatusTypeDef EEPROM_Read(uint16_t mem_addr, uint8_t *data, uint16_t size) {
-	return HAL_I2C_Mem_Read(&hi2c1, eeprom_address, mem_addr,
-	I2C_MEMADD_SIZE_16BIT, data, size, HAL_MAX_DELAY);
-}
-
-/**
- * @brief  EEPROM 테스트 함수
- * @param  None
+ * @brief  타이머 콜백 함수 (주기적 ADC 읽기용)
+ * @param  htim: 타이머 핸들
  * @retval None
  */
-void EEPROM_Test(void) {
-	if (eeprom_address == 0) {
-		printf("EEPROM not detected! Cannot perform test.\n\n");
-		return;
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
+	if (htim->Instance == TIM2) {
+		// 조이스틱 데이터 처리
+		process_joystick_data();
+
+		// UART로 데이터 출력 (디버깅용)
+		printf("X: %d%% (%d), Y: %d%% (%d)\n", joystick_x_percent,
+				joystick_x_filtered, joystick_y_percent, joystick_y_filtered);
 	}
-
-	printf("=== EEPROM Test ===\n");
-
-	// 테스트 데이터 준비
-	char write_data[] = "Hello, STM32F103 with K24C256 EEPROM!";
-	uint8_t read_data[100] = { 0 };
-	uint16_t data_len = strlen(write_data);
-
-	printf("Test Address: 0x%04X\n", TEST_ADDRESS);
-	printf("Write Data: \"%s\" (%d bytes)\n", write_data, data_len);
-
-	// EEPROM에 데이터 쓰기
-	printf("Writing to EEPROM...\n");
-	if (EEPROM_Write(TEST_ADDRESS, (uint8_t*) write_data, data_len) == HAL_OK) {
-		printf("Write successful!\n");
-	} else {
-		printf("Write failed!\n");
-		return;
-	}
-
-	// 잠시 대기
-	HAL_Delay(10);
-
-	// EEPROM에서 데이터 읽기
-	printf("Reading from EEPROM...\n");
-	if (EEPROM_Read(TEST_ADDRESS, read_data, data_len) == HAL_OK) {
-		printf("Read successful!\n");
-		printf("Read Data: \"%s\" (%d bytes)\n", (char*) read_data, data_len);
-
-		// 데이터 비교
-		if (memcmp(write_data, read_data, data_len) == 0) {
-			printf("** Data verification PASSED! **\n");
-		} else {
-			printf("** Data verification FAILED! **\n");
-		}
-	} else {
-		printf("Read failed!\n");
-	}
-
-	printf("===================\n\n");
-
-	// 추가 테스트: 숫자 데이터
-	printf("=== Number Data Test ===\n");
-	uint8_t num_write[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	uint8_t num_read[10] = { 0 };
-	uint16_t num_addr = TEST_ADDRESS + 100;
-
-	printf("Writing numbers 0-9 to address 0x%04X...\n", num_addr);
-	if (EEPROM_Write(num_addr, num_write, 10) == HAL_OK) {
-		HAL_Delay(10);
-
-		if (EEPROM_Read(num_addr, num_read, 10) == HAL_OK) {
-			printf("Write Data: ");
-			for (int i = 0; i < 10; i++)
-				printf("%d ", num_write[i]);
-			printf("\n");
-
-			printf("Read Data:  ");
-			for (int i = 0; i < 10; i++)
-				printf("%d ", num_read[i]);
-			printf("\n");
-
-			if (memcmp(num_write, num_read, 10) == 0) {
-				printf("** Number test PASSED! **\n");
-			} else {
-				printf("** Number test FAILED! **\n");
-			}
-		}
-	}
-	printf("========================\n\n");
 }
-
 /* USER CODE END 0 */
 
 /**
@@ -290,41 +241,38 @@ int main(void) {
 
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
+	MX_DMA_Init();
 	MX_USART2_UART_Init();
-	MX_I2C1_Init();
+	MX_ADC1_Init();
+	MX_TIM2_Init();
 	/* USER CODE BEGIN 2 */
-	printf("\n\n");
-	printf("========================================\n");
-	printf("  STM32F103 I2C EEPROM K24C256 Test    \n");
-	printf("  System Clock: 64MHz                  \n");
-	printf("  I2C Speed: 100kHz                    \n");
-	printf("========================================\n");
+	if (HAL_DMA_Init(&hdma_adc1) != HAL_OK) {
+		Error_Handler();
+	}
 
-	// I2C 주소 스캔
-	I2C_Scan();
+	// ADC1 핸들과 DMA 링크
+	__HAL_LINKDMA(&hadc1, DMA_Handle, hdma_adc1);
 
-	// EEPROM 테스트
-	EEPROM_Test();
+	// ADC 캘리브레이션
+	HAL_ADCEx_Calibration_Start(&hadc1);
 
-	printf("Test completed. Entering main loop...\n\n");
+	// DMA를 사용한 연속 ADC 변환 시작
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*) adc_buffer, ADC_BUFFER_SIZE);
+
+	// 타이머 시작 (50ms 주기로 데이터 처리)
+	HAL_TIM_Base_Start_IT(&htim2);
+
+	// 시작 메시지
+	printf("STM32F103 조이스틱 ADC 읽기 시작\n");
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	uint32_t loop_count = 0;
 	while (1) {
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		// 10초마다 상태 출력
-		if (loop_count % 1000 == 0) {
-			printf("System running... Loop count: %lu\n", loop_count / 1000);
-
-			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		}
-
-		loop_count++;
-		HAL_Delay(10);
+		HAL_Delay(10);  // 메인 루프 딜레이
 	}
 	/* USER CODE END 3 */
 }
@@ -336,6 +284,7 @@ int main(void) {
 void SystemClock_Config(void) {
 	RCC_OscInitTypeDef RCC_OscInitStruct = { 0 };
 	RCC_ClkInitTypeDef RCC_ClkInitStruct = { 0 };
+	RCC_PeriphCLKInitTypeDef PeriphClkInit = { 0 };
 
 	/** Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
@@ -362,37 +311,104 @@ void SystemClock_Config(void) {
 	if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
 		Error_Handler();
 	}
+	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC;
+	PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+	if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
+		Error_Handler();
+	}
 }
 
 /**
- * @brief I2C1 Initialization Function
+ * @brief ADC1 Initialization Function
  * @param None
  * @retval None
  */
-static void MX_I2C1_Init(void) {
+static void MX_ADC1_Init(void) {
 
-	/* USER CODE BEGIN I2C1_Init 0 */
+	/* USER CODE BEGIN ADC1_Init 0 */
 
-	/* USER CODE END I2C1_Init 0 */
+	/* USER CODE END ADC1_Init 0 */
 
-	/* USER CODE BEGIN I2C1_Init 1 */
+	ADC_ChannelConfTypeDef sConfig = { 0 };
 
-	/* USER CODE END I2C1_Init 1 */
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 100000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
+	/* USER CODE BEGIN ADC1_Init 1 */
+
+	/* USER CODE END ADC1_Init 1 */
+
+	/** Common config
+	 */
+	hadc1.Instance = ADC1;
+	hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
+	hadc1.Init.ContinuousConvMode = ENABLE;
+	hadc1.Init.DiscontinuousConvMode = DISABLE;
+	hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+	hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+	hadc1.Init.NbrOfConversion = 2;
+	if (HAL_ADC_Init(&hadc1) != HAL_OK) {
 		Error_Handler();
 	}
-	/* USER CODE BEGIN I2C1_Init 2 */
 
-	/* USER CODE END I2C1_Init 2 */
+	/** Configure Regular Channel
+	 */
+	sConfig.Channel = ADC_CHANNEL_4;
+	sConfig.Rank = ADC_REGULAR_RANK_1;
+	sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+
+	/** Configure Regular Channel
+	 */
+	sConfig.Channel = ADC_CHANNEL_8;
+	sConfig.Rank = ADC_REGULAR_RANK_2;
+	if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN ADC1_Init 2 */
+
+	/* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+ * @brief TIM2 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM2_Init(void) {
+
+	/* USER CODE BEGIN TIM2_Init 0 */
+
+	/* USER CODE END TIM2_Init 0 */
+
+	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
+	TIM_MasterConfigTypeDef sMasterConfig = { 0 };
+
+	/* USER CODE BEGIN TIM2_Init 1 */
+
+	/* USER CODE END TIM2_Init 1 */
+	htim2.Instance = TIM2;
+	htim2.Init.Prescaler = 6400 - 1;
+	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim2.Init.Period = 500 - 1;
+	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
+		Error_Handler();
+	}
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig)
+			!= HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN TIM2_Init 2 */
+
+	/* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -424,6 +440,21 @@ static void MX_USART2_UART_Init(void) {
 	/* USER CODE BEGIN USART2_Init 2 */
 
 	/* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+ * Enable DMA controller clock
+ */
+static void MX_DMA_Init(void) {
+
+	/* DMA controller clock enable */
+	__HAL_RCC_DMA1_CLK_ENABLE();
+
+	/* DMA interrupt init */
+	/* DMA1_Channel1_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 }
 

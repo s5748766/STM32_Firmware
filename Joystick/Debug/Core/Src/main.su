@@ -1,0 +1,13 @@
+../Core/Src/main.c:103:1:__io_putchar	16	static
+../Core/Src/main.c:119:10:apply_moving_average_filter	32	static
+../Core/Src/main.c:161:9:convert_to_percentage	24	static
+../Core/Src/main.c:180:6:process_joystick_data	8	static
+../Core/Src/main.c:204:6:HAL_TIM_PeriodElapsedCallback	24	static
+../Core/Src/main.c:220:5:main	8	static
+../Core/Src/main.c:284:6:SystemClock_Config	88	static
+../Core/Src/main.c:326:13:MX_ADC1_Init	24	static
+../Core/Src/main.c:378:13:MX_TIM2_Init	32	static
+../Core/Src/main.c:420:13:MX_USART2_UART_Init	8	static
+../Core/Src/main.c:449:13:MX_DMA_Init	16	static
+../Core/Src/main.c:466:13:MX_GPIO_Init	40	static
+../Core/Src/main.c:511:6:Error_Handler	4	static,ignoring_inline_asm

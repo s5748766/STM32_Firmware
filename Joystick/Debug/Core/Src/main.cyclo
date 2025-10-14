@@ -1,0 +1,13 @@
+../Core/Src/main.c:103:1:__io_putchar	2
+../Core/Src/main.c:119:10:apply_moving_average_filter	7
+../Core/Src/main.c:161:9:convert_to_percentage	3
+../Core/Src/main.c:180:6:process_joystick_data	1
+../Core/Src/main.c:204:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:220:5:main	2
+../Core/Src/main.c:284:6:SystemClock_Config	4
+../Core/Src/main.c:326:13:MX_ADC1_Init	4
+../Core/Src/main.c:378:13:MX_TIM2_Init	4
+../Core/Src/main.c:420:13:MX_USART2_UART_Init	2
+../Core/Src/main.c:449:13:MX_DMA_Init	1
+../Core/Src/main.c:466:13:MX_GPIO_Init	1
+../Core/Src/main.c:511:6:Error_Handler	1

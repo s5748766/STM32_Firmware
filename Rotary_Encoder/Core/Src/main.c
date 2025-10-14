@@ -22,7 +22,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
-#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -32,10 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define K24C256_ADDR        0xA0    // K24C256 I2C 주소 (A0,A1,A2 = 000)
-#define EEPROM_PAGE_SIZE    64      // K24C256 페이지 크기 (64 bytes)
-#define EEPROM_SIZE         32768   // K24C256 총 크기 (32KB)
-#define TEST_ADDRESS        0x0000  // 테스트용 주소
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -44,29 +40,36 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-I2C_HandleTypeDef hi2c1;
+TIM_HandleTypeDef htim2;
 
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t i2c_scan_found = 0;
-uint8_t eeprom_address = 0;
+// 인코더 관련 변수 (그레이 코드 방식)
+volatile int32_t encoder_count = 0;
+volatile uint8_t encoder_last_encoded = 0;
+
+// 디바운스를 위한 변수
+volatile uint32_t last_interrupt_time = 0;
+#define DEBOUNCE_DELAY 5  // ms 단위
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
-static void MX_I2C1_Init(void);
+static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
-void I2C_Scan(void);
-HAL_StatusTypeDef EEPROM_Write(uint16_t mem_addr, uint8_t *data, uint16_t size);
-HAL_StatusTypeDef EEPROM_Read(uint16_t mem_addr, uint8_t *data, uint16_t size);
-void EEPROM_Test(void);
+void Encoder_Init(void);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * @brief printf 함수를 UART로 리다이렉트
+ */
 #ifdef __GNUC__
 /* With GCC, small printf (option LD Linker->Libraries->Small printf
  set to 'Yes') calls __io_putchar() */
@@ -76,13 +79,13 @@ void EEPROM_Test(void);
 #endif /* __GNUC__ */
 
 /**
- * @brief  Retargets the C library printf function to the USART.
- * @param  None
+ * @brief Retargets the C library printf function to the USART.
+ * @param None
  * @retval None
  */
 PUTCHAR_PROTOTYPE {
 	/* Place your implementation of fputc here */
-	/* e.g. write a character to the USART2 and Loop until the end of transmission */
+	/* e.g. write a character to the USART1 and Loop until the end of transmission */
 	if (ch == '\n')
 		HAL_UART_Transmit(&huart2, (uint8_t*) "\r", 1, 0xFFFF);
 	HAL_UART_Transmit(&huart2, (uint8_t*) &ch, 1, 0xFFFF);
@@ -91,173 +94,48 @@ PUTCHAR_PROTOTYPE {
 }
 
 /**
- * @brief  I2C 주소 스캔 함수
- * @param  None
- * @retval None
+ * @brief 로터리 인코더 초기화 (그레이 코드 방식)
  */
-void I2C_Scan(void) {
-	printf("\n=== I2C Address Scan ===\n");
-	printf("Scanning I2C bus...\n");
-
-	i2c_scan_found = 0;
-
-	for (uint8_t i = 0; i < 128; i++) {
-		if (HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t) (i << 1), 3, 5)
-				== HAL_OK) {
-			printf("Found I2C device at address: 0x%02X (7-bit: 0x%02X)\n",
-					(i << 1), i);
-			i2c_scan_found++;
-
-			// K24C256 주소 범위 확인 (0xA0~0xAE)
-			if ((i << 1) >= 0xA0 && (i << 1) <= 0xAE) {
-				eeprom_address = (i << 1);
-				printf("** K24C256 EEPROM detected at 0x%02X **\n",
-						eeprom_address);
-			}
-		}
-	}
-
-	if (i2c_scan_found == 0) {
-		printf("No I2C devices found!\n");
-	} else {
-		printf("Total %d I2C device(s) found.\n", i2c_scan_found);
-	}
-	printf("========================\n\n");
+void Encoder_Init(void) {
+	// 초기 상태 읽기
+	uint8_t clk = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+	uint8_t dt = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+	encoder_last_encoded = (clk << 1) | dt;
+	encoder_count = 0;
 }
 
 /**
- * @brief  EEPROM 쓰기 함수
- * @param  mem_addr: 메모리 주소
- * @param  data: 쓸 데이터 포인터
- * @param  size: 데이터 크기
- * @retval HAL_StatusTypeDef
+ * @brief GPIO 외부 인터럽트 콜백 함수 (그레이 코드 방식)
+ * 안정적인 로터리 인코더 감지
  */
-HAL_StatusTypeDef EEPROM_Write(uint16_t mem_addr, uint8_t *data, uint16_t size) {
-	HAL_StatusTypeDef status = HAL_OK;
-	uint16_t bytes_to_write;
-	uint16_t current_addr = mem_addr;
-	uint16_t data_index = 0;
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	uint32_t current_time = HAL_GetTick();
 
-	while (size > 0) {
-		// 페이지 경계를 고려한 쓰기 크기 계산
-		bytes_to_write = EEPROM_PAGE_SIZE - (current_addr % EEPROM_PAGE_SIZE);
-		if (bytes_to_write > size)
-			bytes_to_write = size;
-
-		// EEPROM에 쓰기
-		status = HAL_I2C_Mem_Write(&hi2c1, eeprom_address, current_addr,
-		I2C_MEMADD_SIZE_16BIT, &data[data_index], bytes_to_write,
-				HAL_MAX_DELAY);
-
-		if (status != HAL_OK) {
-			printf("EEPROM Write Error at address 0x%04X\n", current_addr);
-			return status;
-		}
-
-		// EEPROM 쓰기 완료 대기 (Write Cycle Time)
-		HAL_Delay(5);
-
-		// 다음 쓰기를 위한 변수 업데이트
-		current_addr += bytes_to_write;
-		data_index += bytes_to_write;
-		size -= bytes_to_write;
-	}
-
-	return status;
-}
-
-/**
- * @brief  EEPROM 읽기 함수
- * @param  mem_addr: 메모리 주소
- * @param  data: 읽을 데이터 포인터
- * @param  size: 데이터 크기
- * @retval HAL_StatusTypeDef
- */
-HAL_StatusTypeDef EEPROM_Read(uint16_t mem_addr, uint8_t *data, uint16_t size) {
-	return HAL_I2C_Mem_Read(&hi2c1, eeprom_address, mem_addr,
-	I2C_MEMADD_SIZE_16BIT, data, size, HAL_MAX_DELAY);
-}
-
-/**
- * @brief  EEPROM 테스트 함수
- * @param  None
- * @retval None
- */
-void EEPROM_Test(void) {
-	if (eeprom_address == 0) {
-		printf("EEPROM not detected! Cannot perform test.\n\n");
+	// 디바운스 처리
+	if (current_time - last_interrupt_time < DEBOUNCE_DELAY) {
 		return;
 	}
+	last_interrupt_time = current_time;
 
-	printf("=== EEPROM Test ===\n");
+	// 인코더 핀들 처리 (PA0, PA1)
+	if (GPIO_Pin == GPIO_PIN_0 || GPIO_Pin == GPIO_PIN_1) {
+		// 현재 상태 읽기
+		uint8_t clk = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0);
+		uint8_t dt = HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1);
+		uint8_t encoded = (clk << 1) | dt;  // 2비트 상태 생성
 
-	// 테스트 데이터 준비
-	char write_data[] = "Hello, STM32F103 with K24C256 EEPROM!";
-	uint8_t read_data[100] = { 0 };
-	uint16_t data_len = strlen(write_data);
+		uint8_t sum = (encoder_last_encoded << 2) | encoded;  // 이전 상태와 현재 상태 결합
 
-	printf("Test Address: 0x%04X\n", TEST_ADDRESS);
-	printf("Write Data: \"%s\" (%d bytes)\n", write_data, data_len);
-
-	// EEPROM에 데이터 쓰기
-	printf("Writing to EEPROM...\n");
-	if (EEPROM_Write(TEST_ADDRESS, (uint8_t*) write_data, data_len) == HAL_OK) {
-		printf("Write successful!\n");
-	} else {
-		printf("Write failed!\n");
-		return;
-	}
-
-	// 잠시 대기
-	HAL_Delay(10);
-
-	// EEPROM에서 데이터 읽기
-	printf("Reading from EEPROM...\n");
-	if (EEPROM_Read(TEST_ADDRESS, read_data, data_len) == HAL_OK) {
-		printf("Read successful!\n");
-		printf("Read Data: \"%s\" (%d bytes)\n", (char*) read_data, data_len);
-
-		// 데이터 비교
-		if (memcmp(write_data, read_data, data_len) == 0) {
-			printf("** Data verification PASSED! **\n");
-		} else {
-			printf("** Data verification FAILED! **\n");
+		// 회전 방향 결정 (그레이 코드 기반)
+		if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) {
+			encoder_count++;  // 시계방향
 		}
-	} else {
-		printf("Read failed!\n");
-	}
-
-	printf("===================\n\n");
-
-	// 추가 테스트: 숫자 데이터
-	printf("=== Number Data Test ===\n");
-	uint8_t num_write[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-	uint8_t num_read[10] = { 0 };
-	uint16_t num_addr = TEST_ADDRESS + 100;
-
-	printf("Writing numbers 0-9 to address 0x%04X...\n", num_addr);
-	if (EEPROM_Write(num_addr, num_write, 10) == HAL_OK) {
-		HAL_Delay(10);
-
-		if (EEPROM_Read(num_addr, num_read, 10) == HAL_OK) {
-			printf("Write Data: ");
-			for (int i = 0; i < 10; i++)
-				printf("%d ", num_write[i]);
-			printf("\n");
-
-			printf("Read Data:  ");
-			for (int i = 0; i < 10; i++)
-				printf("%d ", num_read[i]);
-			printf("\n");
-
-			if (memcmp(num_write, num_read, 10) == 0) {
-				printf("** Number test PASSED! **\n");
-			} else {
-				printf("** Number test FAILED! **\n");
-			}
+		if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
+			encoder_count--;  // 반시계방향
 		}
+
+		encoder_last_encoded = encoded;
 	}
-	printf("========================\n\n");
 }
 
 /* USER CODE END 0 */
@@ -269,7 +147,7 @@ void EEPROM_Test(void) {
 int main(void) {
 
 	/* USER CODE BEGIN 1 */
-
+	int32_t last_encoder_count = 0;
 	/* USER CODE END 1 */
 
 	/* MCU Configuration--------------------------------------------------------*/
@@ -291,40 +169,43 @@ int main(void) {
 	/* Initialize all configured peripherals */
 	MX_GPIO_Init();
 	MX_USART2_UART_Init();
-	MX_I2C1_Init();
+	MX_TIM2_Init();
 	/* USER CODE BEGIN 2 */
-	printf("\n\n");
-	printf("========================================\n");
-	printf("  STM32F103 I2C EEPROM K24C256 Test    \n");
-	printf("  System Clock: 64MHz                  \n");
-	printf("  I2C Speed: 100kHz                    \n");
-	printf("========================================\n");
+	// 로터리 인코더 초기화
+	Encoder_Init();
 
-	// I2C 주소 스캔
-	I2C_Scan();
+	// 타이머 시작 (시간 측정용)
+	HAL_TIM_Base_Start(&htim2);
 
-	// EEPROM 테스트
-	EEPROM_Test();
+	printf("=============================\r\n");
+	printf("STM32F103 로터리 인코더 테스트 시작\r\n");
+	printf("시스템 클록: %lu Hz\r\n", SystemCoreClock);
+	printf("그레이 코드 기반 안정적 감지 방식 적용\r\n");
+	printf("인코더 카운트 변화를 모니터링합니다...\r\n");
+	printf("=============================\r\n");
 
-	printf("Test completed. Entering main loop...\n\n");
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
-	uint32_t loop_count = 0;
 	while (1) {
+		// 인코더 값 변화 감지 및 출력
+		if (encoder_count != last_encoder_count) {
+			printf("인코더 카운트: %ld", encoder_count);
+
+			if (encoder_count > last_encoder_count) {
+				printf(" (시계방향)\r\n");
+			} else {
+				printf(" (반시계방향)\r\n");
+			}
+
+			last_encoder_count = encoder_count;
+		}
+
+		HAL_Delay(1);  // CPU 부하 감소
 		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
-		// 10초마다 상태 출력
-		if (loop_count % 1000 == 0) {
-			printf("System running... Loop count: %lu\n", loop_count / 1000);
-
-			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		}
-
-		loop_count++;
-		HAL_Delay(10);
 	}
 	/* USER CODE END 3 */
 }
@@ -365,34 +246,44 @@ void SystemClock_Config(void) {
 }
 
 /**
- * @brief I2C1 Initialization Function
+ * @brief TIM2 Initialization Function
  * @param None
  * @retval None
  */
-static void MX_I2C1_Init(void) {
+static void MX_TIM2_Init(void) {
 
-	/* USER CODE BEGIN I2C1_Init 0 */
+	/* USER CODE BEGIN TIM2_Init 0 */
 
-	/* USER CODE END I2C1_Init 0 */
+	/* USER CODE END TIM2_Init 0 */
 
-	/* USER CODE BEGIN I2C1_Init 1 */
+	TIM_ClockConfigTypeDef sClockSourceConfig = { 0 };
+	TIM_MasterConfigTypeDef sMasterConfig = { 0 };
 
-	/* USER CODE END I2C1_Init 1 */
-	hi2c1.Instance = I2C1;
-	hi2c1.Init.ClockSpeed = 100000;
-	hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-	hi2c1.Init.OwnAddress1 = 0;
-	hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-	hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-	hi2c1.Init.OwnAddress2 = 0;
-	hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-	hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-	if (HAL_I2C_Init(&hi2c1) != HAL_OK) {
+	/* USER CODE BEGIN TIM2_Init 1 */
+
+	/* USER CODE END TIM2_Init 1 */
+	htim2.Instance = TIM2;
+	htim2.Init.Prescaler = 64000 - 1;
+	htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+	htim2.Init.Period = 1000 - 1;
+	htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	if (HAL_TIM_Base_Init(&htim2) != HAL_OK) {
 		Error_Handler();
 	}
-	/* USER CODE BEGIN I2C1_Init 2 */
+	sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+	if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK) {
+		Error_Handler();
+	}
+	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+	if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig)
+			!= HAL_OK) {
+		Error_Handler();
+	}
+	/* USER CODE BEGIN TIM2_Init 2 */
 
-	/* USER CODE END I2C1_Init 2 */
+	/* USER CODE END TIM2_Init 2 */
 
 }
 
@@ -453,6 +344,12 @@ static void MX_GPIO_Init(void) {
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
+	/*Configure GPIO pins : CLK_Pin_Pin DT_Pin_Pin */
+	GPIO_InitStruct.Pin = CLK_Pin_Pin | DT_Pin_Pin;
+	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
 	/*Configure GPIO pin : LD2_Pin */
 	GPIO_InitStruct.Pin = LD2_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -461,7 +358,13 @@ static void MX_GPIO_Init(void) {
 	HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
 	/* EXTI interrupt init*/
-	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(EXTI0_IRQn, 1, 0);
+	HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
+	HAL_NVIC_SetPriority(EXTI1_IRQn, 1, 0);
+	HAL_NVIC_EnableIRQ(EXTI1_IRQn);
+
+	HAL_NVIC_SetPriority(EXTI15_10_IRQn, 2, 0);
 	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 	/* USER CODE BEGIN MX_GPIO_Init_2 */
