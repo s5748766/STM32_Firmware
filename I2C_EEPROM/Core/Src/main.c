@@ -319,7 +319,6 @@ int main(void) {
 		// 10초마다 상태 출력
 		if (loop_count % 1000 == 0) {
 			printf("System running... Loop count: %lu\n", loop_count / 1000);
-
 			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		}
 

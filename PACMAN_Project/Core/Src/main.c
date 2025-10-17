@@ -332,7 +332,7 @@ void Pacman_StartScreen(void) {
 	ILI9341_FillRect(10, 160, 220, 4, COLOR_BLUE);
 
 	/* PAC-MAN 로고풍 텍스트 (노란색, 3배 확대) */
-	DrawText(20, 8, "PAPRESS", COLOR_YELLOW, COLOR_BLACK, 3); // 'PACMAN'을 폰트 제한 때문에 'PA'만 노랑+유령으로 대체
+	DrawText(20, 8, "PA  MAN", COLOR_YELLOW, COLOR_BLACK, 3); // 'PACMAN'을 폰트 제한 때문에 'PA'만 노랑+유령으로 대체
 	/* 'C' 대신 팩맨 아이콘으로 로고 느낌 내기 */
 	DrawPacman(20 + 6 * 3 * 2 + 18, 20, 12, 60.f, COLOR_YELLOW,
 	COLOR_BLACK); // 글자 옆에 팩맨
