@@ -319,7 +319,7 @@ HAL_StatusTypeDef EEPROM_Write(uint16_t mem_addr, uint8_t *data, uint16_t size) 
  80002ce:	4603      	mov	r3, r0
  80002d0:	73fb      	strb	r3, [r7, #15]
 		I2C_MEMADD_SIZE_16BIT, &data[data_index], bytes_to_write,
-		HAL_MAX_DELAY);
+				HAL_MAX_DELAY);
 
 		if (status != HAL_OK) {
  80002d2:	7bfb      	ldrb	r3, [r7, #15]
