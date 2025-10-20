@@ -2,9 +2,9 @@
 CAD.formats=
 CAD.pinconfig=
 CAD.provider=
-FREERTOS.FootprintOK=false
+FREERTOS.FootprintOK=true
 FREERTOS.IPParameters=Tasks01,FootprintOK
-FREERTOS.Tasks01=Task_Manager,24,384,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;Task_MotorCtrl,8,256,StartTask02,Default,NULL,Dynamic,NULL,NULL;Task_Ultrasonic,8,384,StartTask03,Default,NULL,Dynamic,NULL,NULL;Task_WiFi,8,768,StartTask04,Default,NULL,Dynamic,NULL,NULL;Task_LCD,8,512,StartTask06,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.Tasks01=control_task,24,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;wifi_task,8,128,StartTask02,Default,NULL,Dynamic,NULL,NULL;sensor_task,8,128,StartTask03,Default,NULL,Dynamic,NULL,NULL;ui_log_task,8,128,StartTask04,Default,NULL,Dynamic,NULL,NULL
 File.Version=6
 GPIO.groupedBy=Group By Peripherals
 KeepUserPlacement=false
@@ -269,5 +269,4 @@ VP_TIM1_VS_ClockSourceINT.Mode=Internal
 VP_TIM1_VS_ClockSourceINT.Signal=TIM1_VS_ClockSourceINT
 board=NUCLEO-F103RB
 boardIOC=true
-rtos.0.ip=FREERTOS
 isbadioc=false
